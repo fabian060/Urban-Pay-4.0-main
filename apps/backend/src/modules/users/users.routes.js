@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import usersRepository from './users.repository.js';
 import jwt from 'jsonwebtoken';
 import nodemailerService from '../../services/nodemailer.js';
+import { endpoint } from '../../config/endpoints.js';
 const usersRouter = express.Router();
 
 // Buscar usuarios por número de casa
@@ -37,7 +38,7 @@ usersRouter.post('/', async (req, res) => {
     from: process.env.EMAIL_USER,
     to: body.email,
     subject: 'Verifica tu correo',
-    html: `<a href="http://localhost:4321/verify/${token}">Verifica tu correo</a>`,
+    html: `<a href="${endpoint}/verify/${token}">Verifica tu correo</a>`,
   });
 
   res.sendStatus(200);

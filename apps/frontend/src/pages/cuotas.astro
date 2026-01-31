@@ -1,0 +1,17 @@
+---
+import AuthProtected from "../features/auth/AuthProtected.astro"
+import CuotasList from "../features/Cuotas/CuotasList.astro"
+import CreateCuotaForm from "../features/Cuotas/CreateCuotaForm.astro"
+import Layout from "../layouts/layouts.astro"
+import Sidebar from '../components/Sidebar.astro';
+---
+<Layout title="App">
+  <AuthProtected>
+      <Sidebar />
+      <main class="h-[calc(100vh-4rem)] flex flex-col gap-8 p-4 max-w-[90rem] mx-auto md:items-center">
+        <CreateCuotaForm/>
+        <CuotasList/>
+      </main>
+    </div>
+  </AuthProtected>
+</Layout>

@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import { ZodError } from "zod/v4";
 import { ErrorWithStatus } from "./src/utils/errorTypes.js";

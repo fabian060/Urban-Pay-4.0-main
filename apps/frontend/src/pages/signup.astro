@@ -1,5 +1,4 @@
 ---
-import AuthUnprotected from "../features/auth/AuthUnprotected.astro";
 import Layout from "../layouts/layouts.astro";
 ---
 
@@ -36,7 +35,7 @@ import Layout from "../layouts/layouts.astro";
             class="w-full px-4 py-2 text-gray-900 bg-gray-50 border rounded-lg focus:ring-blue-500 focus:outline-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors duration-200"
           />
           <p id="house-number-helper" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            Ingresa el número de casa (ejemplo: Q-###).
+            Ingresa el número de casa (ejemplo: Q-###).<br> Recuerda el guion despues de la letra mayuscula.            
           </p>
         </div>
 
@@ -51,7 +50,7 @@ import Layout from "../layouts/layouts.astro";
             class="w-full px-4 py-2 text-gray-900 bg-gray-50 border rounded-lg focus:ring-blue-500 focus:outline-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors duration-200"
           />
           <p id="password-helper" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            Debe tener al menos 6 caracteres e incluir una letra, un número y un carácter especial (!@#$%^&*).
+            Debe tener al menos 6 caracteres e incluir una letra, un número y un carácter especial (!@#$%^&*-).
           </p>
         </div>
 
@@ -110,7 +109,7 @@ import Layout from "../layouts/layouts.astro";
   // Validation Regular Expressions
   const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
   // At least 1 letter, 1 number, 1 special character, and minimum 6 characters.
-  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&\-])[A-Za-z\d@$!%*#?&\-]{6,}$/;
 
   // Validation State
   const validationState = {

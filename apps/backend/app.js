@@ -15,7 +15,6 @@ import authRouter from "./src/modules/auth/auth.routes.js";
 import path from "path";
 import { handler as ssrHandler } from './dist/server/entry.mjs';
 const app = express();
-dotenv.config({ path: '/etc/secrets/.env' });
 
 app.use(cors({ credentials: true, origin: ["http://localhost:4321"] }));
 app.use(express.json());

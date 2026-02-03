@@ -1,4 +1,5 @@
 import "dotenv/config";
+import dotenv from "dotenv";
 import express from "express";
 import { ZodError } from "zod/v4";
 import { ErrorWithStatus } from "./src/utils/errorTypes.js";
@@ -14,7 +15,7 @@ import authRouter from "./src/modules/auth/auth.routes.js";
 import path from "path";
 import { handler as ssrHandler } from './dist/server/entry.mjs';
 const app = express();
-require('dotenv').config({ path: '/etc/secrets/.env' });
+dotenv.config({ path: '/etc/secrets/.env' });
 
 app.use(cors({ credentials: true, origin: ["http://localhost:4321"] }));
 app.use(express.json());

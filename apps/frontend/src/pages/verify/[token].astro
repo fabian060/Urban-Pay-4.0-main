@@ -24,7 +24,12 @@ export const prerender = false
       window.location.replace('/login');
     }, 3000);
   } catch (error) {
-    const errorData = await error.response.json();
-    verifyText.innerHTML = errorData.error;
+    console.error(error);
+    // Si `error.response` existe, es un error del backend (ej: 400, 401).
+    // Si no, es un error de red (ej: backend caído o URL incorrecta como 'localhost').
+    const errorData = error.response
+      ? await error.response.json()
+      : { error: 'Error de conexión: No se pudo contactar al servidor.' };
+    verifyText.innerHTML = errorData.error || 'Ocurrió un error inesperado.';
   }
 </script>

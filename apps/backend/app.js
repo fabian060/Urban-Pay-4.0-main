@@ -1,7 +1,6 @@
 import "dotenv/config";
-import dotenv from "dotenv";
 import express from "express";
-import { ZodError } from "zod/v4";
+import { ZodError } from "zod"; 
 import { ErrorWithStatus } from "./src/utils/errorTypes.js";
 import { DatabaseError } from "pg";
 import cors from "cors";
@@ -13,17 +12,26 @@ import cookieParser from "cookie-parser";
 import { authenticateUser } from "./src/modules/auth/auth.middlewares.js";
 import authRouter from "./src/modules/auth/auth.routes.js";
 import path from "path";
+import { fileURLToPath } from "url"; 
 import { handler as ssrHandler } from './dist/server/entry.mjs';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 const app = express();
 
 app.use(cors({ credentials: true, origin: ["http://localhost:4321"] }));
 app.use(express.json());
 app.use(cookieParser());
 
+app.use(express.static(path.join(__dirname, 'dist', 'client')));
+
+// 2. Rutas de la API
 app.use("/api/cuotas", authenticateUser, cuotasRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/payment", authenticateUser, paymentRouter);
+
+app.use(ssrHandler);
 
 app.use((err, req, res, _next) => {
   console.log(err);
@@ -59,8 +67,5 @@ app.use((err, req, res, _next) => {
 
   res.status(500).json({ error: "HUBO UN ERROR" });
 });
-
-app.use(express.static(path.join(import.meta.dirname, 'dist', 'client')));
-app.use(ssrHandler);
 
 export default app;

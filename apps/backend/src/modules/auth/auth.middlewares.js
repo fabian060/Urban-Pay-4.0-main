@@ -3,8 +3,7 @@ import jwt from 'jsonwebtoken';
 import usersRepository from '../users/users.repository.js';
 
 export const authenticateUser = async (req, res, next) => {
-  // Permitir el registro de usuarios (POST /api/users) sin autenticación
-  if (req.method === 'POST' && (req.originalUrl || req.url).includes('/api/users')) {
+  if ((req.method === 'POST' && (req.originalUrl || req.url).includes('/api/users')) || (req.originalUrl || req.url).includes('/verify')) {
     return next();
   }
 

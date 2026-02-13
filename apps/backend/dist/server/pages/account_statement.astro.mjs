@@ -1,7 +1,7 @@
 import { e as createComponent, k as renderComponent, l as renderScript, r as renderTemplate, m as maybeRenderHead } from '../chunks/astro/server_CsuFGHyV.mjs';
 import 'piccolore';
 import { $ as $$AuthProtected } from '../chunks/AuthProtected_GzXkQSC9.mjs';
-import { $ as $$Layouts } from '../chunks/layouts_DxcNah2t.mjs';
+import { $ as $$Layouts } from '../chunks/layouts_Cu8iWPAf.mjs';
 import { $ as $$Sidebar } from '../chunks/Sidebar_Da6skxKW.mjs';
 export { renderers } from '../renderers.mjs';
 

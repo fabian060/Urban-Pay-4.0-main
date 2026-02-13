@@ -1,0 +1,1 @@
+export const BACK_ENDPOINT = import.meta.env.PUBLIC_BACKEND_URL;

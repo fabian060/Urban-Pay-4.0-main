@@ -1,0 +1,38 @@
+---
+import AuthProtected from "../features/auth/AuthProtected.astro"
+import Layout from "../layouts/layouts.astro"
+import Sidebar from '../components/Sidebar.astro';
+---
+
+<Layout title="Agregar Comunicados">
+  <AuthProtected>
+    <div class="flex min-h-[calc(100vh-4rem)] bg-gray-100 dark:bg-gray-900">
+      <Sidebar />
+      <main class="flex flex-col gap-8 p-4 max-w-[90rem] mx-auto md:items-center w-full">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Agregar Comunicados</h1>
+        <form id="main-form" class="flex gap-2 items-center">
+          <input id="title_press_releases" type="text" placeholder="Título del comunicado" class="border p-2 rounded" required />
+          <input id="press_releases" type="text" placeholder="Comunicado" class="border p-2 rounded" required />
+          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Agregar</button>
+        </form>
+      </main>
+    </div>
+  </AuthProtected>
+</Layout>
+
+<script>
+  // @ts-nocheck
+  import ky from "ky";
+  import { BACK_ENDPOINT } from "../config/endpoints";
+  import { createNotification } from "../features/notifications/notificiation.js";
+
+  const form = document.getElementById('main-form');
+  const pressReleasesInput = document.getElementById('press_releases');
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const pressReleases = pressReleasesInput.value.trim();
+    if (!pressReleases) return;
+  });
+    
+</script>

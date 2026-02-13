@@ -1,0 +1,30 @@
+<div id="auth-div" class="bg-gray-100 dark:bg-gray-900">
+  <div id="loading-text" class="flex flex-row gap-2 h-screen w-full justify-center items-center">
+    <div class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"></div>
+    <div class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.3s]"></div>
+    <div class="w-4 h-4 rounded-full bg-blue-700 animate-bounce [animation-delay:.7s]"></div>
+  </div>
+  <div id="auth-content" class="hidden">
+    <slot>
+  </div>
+</div>
+
+<script>
+  // @ts-nocheck
+  import AuthModule from "./auth.module";
+  const loadingText = document.querySelector('#loading-text');
+  const authContent = document.querySelector('#auth-content');
+  const authDiv = document.querySelector('#auth-div');
+
+  try {
+    await AuthModule.getLoggedUser();
+    location.replace('/inicio');
+  } catch (error) {
+    if (error.response.status === 401 || error.response.status === 403) {
+      authContent.classList.remove('hidden');
+    }
+  } finally {
+    loadingText.remove();
+  }
+  
+</script>

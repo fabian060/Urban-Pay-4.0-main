@@ -1,0 +1,23 @@
+{
+  "name": "urban-pay-4.0-main",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm run start --workspace=server",
+    "client:dev": "npm run dev --workspace=client",
+    "server:dev": "npm run dev --workspace=server",
+    "server:prod": "npm run prod --workspace=server",
+    "build:client": "npm run build --workspace=client",
+    "build": "npm run build --workspaces"
+  },
+  "workspaces": [
+    "apps/*"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "kleur": "^4.1.5"
+  }
+}

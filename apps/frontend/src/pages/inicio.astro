@@ -1,0 +1,203 @@
+---
+import Layout from '../layouts/layouts.astro';
+import Sidebar from '../components/Sidebar.astro';
+
+// Datos simulados para visualizar el diseño (luego vendrán de tu backend)
+const resumen = {
+  estado: "Cargando...",
+  proximoVencimiento: "...",
+  monto: "...",
+  totalPagadoAnio: "...",
+  comunicados: [
+    { titulo: "Mantenimiento de Piscina", fecha: "05 Feb", contenido: "La piscina estará cerrada por mantenimiento preventivo." },
+    { titulo: "Reunión de Vecinos", fecha: "12 Feb", contenido: "Reunión mensual en el salón comunal a las 18:00." }
+  ]
+};
+---
+<Layout title="Inicio - Urban Pay">
+  <div class="flex min-h-[calc(100vh-4rem)] bg-gray-100 dark:bg-gray-900">
+    <Sidebar />
+    <main class="flex-1 p-6 lg:ml-48">
+      <header class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Panel de Inicio</h1>
+        <p class="mt-1 text-gray-600 dark:text-gray-400">Bienvenido al sistema de gestión de Urba Pago</p>
+      </header>
+
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <!-- Tarjeta de Estado -->
+        <div class="rounded-lg bg-white p-6 shadow-md dark:bg-gray-800 border border-gray-300 dark:border-gray-500">
+          <h2 class="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-200">Estado de Cuenta</h2>
+          <p id="estado-cuenta" class="text-2xl font-bold text-gray-500 dark:text-gray-400">{resumen.estado}</p>
+          <p id="mensaje-estado" class="mt-1 text-sm text-gray-500 dark:text-gray-400">Verificando...</p>
+        </div>
+
+        <!-- Tarjeta de Próximo Pago -->
+        <div class="rounded-lg bg-white p-6 shadow-md dark:bg-gray-800 border border-gray-300 dark:border-gray-500">
+          <h2 class="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-200">Cuentas Pendientes</h2>
+          <div class="mt-4 flex items-baseline justify-between">
+            <span id="total-pendientes" class="text-2xl font-bold text-gray-900 dark:text-white">{resumen.monto}</span>
+            <span id="proximo-vencimiento" class="text-sm text-gray-500 dark:text-gray-400">{resumen.proximoVencimiento}</span>
+          </div>
+        </div>
+
+        <!-- Tarjeta de Total Pagado (Nuevo) -->
+        <div class="rounded-lg bg-white p-6 shadow-md dark:bg-gray-800 border border-gray-300 dark:border-gray-500">
+          <h2 class="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-200">Pagado este Año</h2>
+          <div class="mt-4 flex items-baseline justify-between">
+            <span id="total-pagado-anio" class="text-2xl font-bold text-blue-600 dark:text-blue-400">{resumen.totalPagadoAnio}</span>
+            <span id="cantidad-pagos-anio" class="text-sm text-gray-500 dark:text-gray-400">...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+         Sección de Comunicados -->
+        <!-- <div class="lg:col-span-3 rounded-lg bg-white p-6 shadow-md dark:bg-gray-800 border border-gray-300 dark:border-gray-500">
+          <h2 class="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-200">Comunicados</h2>
+          <div class="space-y-4">
+            {resumen.comunicados.map((item) => (
+              <div class="border-l-4 border-blue-500 pl-4">
+                <h3 class="font-medium text-gray-900 dark:text-white">{item.titulo} <span class="text-xs text-gray-500 font-normal ml-2">{item.fecha}</span></h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{item.contenido}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div> -->
+
+      <div class="mt-8 rounded-lg bg-white p-6 shadow-md dark:bg-gray-800 border border-gray-300 dark:border-gray-500">
+        <h2 class="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-200">Actividad Reciente</h2>
+        <div id="actividad-reciente-container" class="space-y-2">
+          <p class="italic text-gray-500 dark:text-gray-400">No hay movimientos recientes para mostrar.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+</Layout>
+
+<script>
+  // @ts-nocheck
+  import ky from "ky";
+  import { BACK_ENDPOINT } from "../config/endpoints";
+
+  async function loadDashboardData() {
+    const totalPendientesEl = document.getElementById('total-pendientes');
+    const proximoVencimientoEl = document.getElementById('proximo-vencimiento');
+    const estadoCuentaEl = document.getElementById('estado-cuenta');
+    const mensajeEstadoEl = document.getElementById('mensaje-estado');
+    const totalPagadoAnioEl = document.getElementById('total-pagado-anio');
+    const cantidadPagosAnioEl = document.getElementById('cantidad-pagos-anio');
+    const actividadRecienteContainer = document.getElementById('actividad-reciente-container');
+
+    try {
+      // Obtener todas las cuotas y pagos del usuario (reutilizando lógica de account_statement)
+      const [cuotas, pagos] = await Promise.all([
+        ky.get(`${BACK_ENDPOINT}/api/cuotas`, { credentials: 'include' }).json(),
+        ky.get(`${BACK_ENDPOINT}/api/payment`, { credentials: 'include' }).json()
+      ]);
+
+      // --- Lógica para Actividad Reciente ---
+      if (pagos.length > 0) {
+        const recentPayments = [...pagos]
+          .sort((a, b) => new Date(b.date) - new Date(a.date))
+          .slice(0, 5); // Tomar los 5 más recientes
+
+        actividadRecienteContainer.innerHTML = ''; // Limpiar placeholder
+
+        recentPayments.forEach(pago => {
+          const cuota = cuotas.find(c => c.id === pago.cuota_id);
+          const monto = cuota ? Number(cuota.monto).toFixed(2) : 'N/A';
+          const concepto = cuota ? (cuota.name || `Cuota de ${new Date(cuota.date_limit).toLocaleString('es-ES', { month: 'long'})}`) : 'Concepto no encontrado';
+          const fecha = new Date(pago.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
+
+          let statusClass = '';
+          let statusText = '';
+          switch (pago.status) {
+            case 'accepted':
+              statusClass = 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+              statusText = 'Aceptado';
+              break;
+            case 'rejected':
+              statusClass = 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+              statusText = 'Rechazado';
+              break;
+            default:
+              statusClass = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
+              statusText = 'Pendiente';
+              break;
+          }
+
+          const activityItemHTML = `
+            <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
+              <div>
+                <p class="font-medium text-gray-800 dark:text-gray-200">${concepto}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Pagado el: ${fecha}</p>
+              </div>
+              <div class="text-right">
+                <p class="font-semibold text-gray-900 dark:text-white">$${monto}</p>
+                <span class="px-2 py-1 text-xs font-medium rounded-full ${statusClass}">${statusText}</span>
+              </div>
+            </div>
+          `;
+          actividadRecienteContainer.insertAdjacentHTML('beforeend', activityItemHTML);
+        });
+      }
+
+      // Filtrar pagos aceptados
+      const pagosAceptados = pagos.filter(pago => pago.status === 'accepted');
+      const cuotasPagadasIds = pagosAceptados.map(pago => pago.cuota_id);
+
+      // Filtrar cuotas pendientes
+      const pendientes = cuotas.filter(cuota => !cuotasPagadasIds.includes(cuota.id));
+
+      // Calcular total
+      const totalPendiente = pendientes.reduce((acc, cuota) => acc + Number(cuota.monto), 0);
+      
+      // Calcular pagado este año
+      const currentYear = new Date().getFullYear();
+      const pagosEsteAnio = pagosAceptados.filter(pago => {
+        const pagoDate = new Date(pago.date);
+        return pagoDate.getFullYear() === currentYear;
+      });
+
+      const totalPagado = pagosEsteAnio.reduce((acc, pago) => {
+        const cuota = cuotas.find(c => c.id === pago.cuota_id);
+        return acc + (cuota ? Number(cuota.monto) : 0);
+      }, 0);
+
+      if (totalPagadoAnioEl) totalPagadoAnioEl.textContent = `$${totalPagado.toFixed(2)}`;
+      if (cantidadPagosAnioEl) cantidadPagosAnioEl.textContent = `${pagosEsteAnio.length} Pagos`;
+
+      // Actualizar UI
+      if (totalPendientesEl) totalPendientesEl.textContent = `$${totalPendiente.toFixed(2)}`;
+      
+      if (pendientes.length > 0) {
+        // Ordenar por fecha límite para obtener la más próxima a vencer
+        pendientes.sort((a, b) => new Date(a.date_limit) - new Date(b.date_limit));
+        
+        if (proximoVencimientoEl) {
+            const nextDate = new Date(pendientes[0].date_limit);
+            proximoVencimientoEl.textContent = nextDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
+        }
+
+        if (estadoCuentaEl) {
+            estadoCuentaEl.textContent = "Con Deuda";
+            estadoCuentaEl.className = "text-2xl font-bold text-red-500 dark:text-red-400";
+        }
+        if (mensajeEstadoEl) mensajeEstadoEl.textContent = `Tienes ${pendientes.length} cuotas pendientes`;
+
+      } else {
+        if (proximoVencimientoEl) proximoVencimientoEl.textContent = "-";
+        if (estadoCuentaEl) {
+            estadoCuentaEl.textContent = "Al día";
+            estadoCuentaEl.className = "text-2xl font-bold text-green-500 dark:text-green-400";
+        }
+        if (mensajeEstadoEl) mensajeEstadoEl.textContent = "No tienes deudas pendientes";
+      }
+    } catch (error) {
+      console.error("Error cargando datos del dashboard", error);
+    }
+  }
+
+  loadDashboardData();
+</script>

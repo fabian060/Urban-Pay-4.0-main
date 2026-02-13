@@ -1,0 +1,140 @@
+---
+import CuotasItem from "./CuotasItem.astro";
+import cuotasModule from './cuotas.module.js';
+
+const { readonly = false } = Astro.props;
+---
+
+<ul id="cuotas-list" class="m-0 p-2 list-none overflow-auto flex flex-col gap-8 rounded-md border border-gray-300 dark:border-gray-500 w-full">
+  <template id="cuotas-item-template">
+    <CuotasItem 
+      description="mes de agosto"
+      date="08-07-2025"
+      date_limit="08-08-2025"    
+      id={0}
+    />
+  </template>
+</ul>
+
+<script>
+  // @ts-nocheck
+  import ky from "ky";
+  import { BACK_ENDPOINT } from "../../config/endpoints";
+  import cuotasModule, { cuotas } from "./cuotas.module.js";
+  import { getPagos, pagos } from "./pagos.module.js";
+  import { createNotification } from "../notifications/notificiation.js"; 
+  const cuotasList = document.querySelector('#cuotas-list');
+  const cuotasItemTemplate = document.querySelector('#cuotas-item-template');
+  await cuotasModule.getCuotas();
+  // Obtener usuario actual (hacer esto antes de pedir pagos para que la API filtre por la casa correcta)
+  const currentUser = await ky.get(`${BACK_ENDPOINT}/api/auth/user`, { credentials: 'include' }).json();
+  // Obtener usuarios de la misma casa para marcar pagos por casa
+  const houseUsers = await ky.get(`${BACK_ENDPOINT}/api/users/search?house_number=${currentUser.house_number}`, { credentials: 'include' }).json();
+  const userIds = new Set(houseUsers.map(u => u.id));
+  // Obtener pagos DESPUÉS de conocer el usuario para asegurar que el backend filtre por house (no mostrar pagos de otras casas)
+  await getPagos();
+  // paid/pending sets se recalculan dentro del render para mantenerlos actualizados
+
+  cuotas.subscribe(cuotas => {
+    // Recomputar pagos por casa (aceptados y pendientes)
+    const pagosData = pagos.get();
+    const paidCuotaIds = new Set();
+    const pendingCuotaIds = new Set();
+    for (const pago of pagosData) {
+      if (userIds.has(pago.user_id)) {
+        if (pago.status === 'accepted') paidCuotaIds.add(pago.cuota_id);
+        if (pago.status === 'pending') pendingCuotaIds.add(pago.cuota_id);
+      }
+    }
+
+    // Reiniciamos el estado de la lista
+    cuotasList.innerHTML = '';
+    // Mostrar todas las cuotas para edición/creación
+    let cuotasFiltradas = [...cuotas];
+    // Ordenar por fecha descendente (de la más nueva a la más vieja)
+    cuotasFiltradas.sort((a, b) => {
+      const fechaA = new Date(a.date);
+      const fechaB = new Date(b.date);
+      return fechaB - fechaA;
+    });
+    for (const cuota of cuotasFiltradas) {
+      // Clonamos el componente del li
+      const cuotaItem = cuotasItemTemplate.content.cloneNode(true).children[0];
+      // Seleccionamos los inputs a reemplazar
+      const inputDescription = cuotaItem.children[0].children[0];
+      const inputDate = cuotaItem.children[0].children[1];
+      const inputDateLimit = cuotaItem.children[0].children[2];
+      const inputMonto = cuotaItem.children[0].children[3];
+      // Extraer solo la fecha (yyyy-mm-dd) si viene con hora
+      const cleanDate = cuota.date ? cuota.date.split('T')[0] : cuota.date;
+      const cleanDateLimit = cuota.date_limit ? cuota.date_limit.split('T')[0] : cuota.date_limit;
+      // Editamos el li
+      cuotaItem.id = cuota.id;
+      inputDescription.value = cuota.description;
+      inputDate.value = cleanDate;
+      inputDateLimit.value = cleanDateLimit;
+      inputMonto.value = cuota.monto;
+      // Marcar cuotas pagadas y actualizar estado del boton Pagar
+      const payBtn = cuotaItem.querySelector('.pay-btn');
+      if (paidCuotaIds.has(cuota.id)) {
+        cuotaItem.style.backgroundColor = '#d1fae5'; // verde claro para pagadas
+        if (payBtn) payBtn.disabled = true;
+      } else if (pendingCuotaIds.has(cuota.id)) {
+        cuotaItem.style.backgroundColor = '#fff7ed'; // amarillo claro para pendientes
+        if (payBtn) {
+          payBtn.disabled = true;
+          payBtn.title = 'Pago pendiente';
+        }
+      } else {
+        if (payBtn) payBtn.disabled = false;
+      }
+      // Adjuntamos el nuevo li a la lista      
+      cuotasList.append(cuotaItem);
+    }
+  });
+  cuotasList.addEventListener('click', async e => {
+    const deleteBtn = e.target.closest('.delete-btn');
+  
+    if (deleteBtn) {
+      // 1. Encuentro el li
+      const li = deleteBtn.parentElement.parentElement;
+      // 2. Actualizo el array en js, usando el metodo filter para devolver todos las cuotas excepto el que quiero eliminar.
+  await cuotasModule.removeCuota(li.id);
+    }
+
+    // Nuevo manejador: Pagar una cuota
+    const payBtn = e.target.closest('.pay-btn');
+    if (payBtn) {
+      const li = payBtn.parentElement.parentElement;
+      // Evitar pagar si ya esta deshabilitado
+      if (payBtn.disabled) return;
+      const cuotaMonto = li.children[0].children[3].value;
+      const payload = {
+        date: new Date().toISOString().split('T')[0],
+        payment_reference: String(Math.floor(1000 + Math.random() * 9000)),
+        payment_methods_id: '1',
+        monto: cuotaMonto
+      };
+      try {
+        await ky.post(`${BACK_ENDPOINT}/api/payment`, { json: payload, credentials: 'include' }).json();
+        // Refrescar pagos y cuotas para re-renderizar el estado por casa
+        await getPagos();
+        await cuotasModule.getCuotas();
+        // Marcar UI como pagada
+        li.style.backgroundColor = '#d1fae5';
+        const payBtnLocal = li.querySelector('.pay-btn');
+        if (payBtnLocal) payBtnLocal.disabled = true;
+        createNotification({ title: 'Pago realizado', description: 'Tu pago fue registrado y está pendiente de aprobación', type: 'success' });
+      } catch (err) {
+        console.error(err);
+        try {
+          const errData = await err.response.json();
+          createNotification({ title: 'Error al pagar', description: errData.error || 'Hubo un error', type: 'error' });
+        } catch (e) {
+          createNotification({ title: 'Error al pagar', description: 'Hubo un error', type: 'error' });
+        }
+      }
+    }
+  });
+  // ...eliminado botones de filtro...
+</script>

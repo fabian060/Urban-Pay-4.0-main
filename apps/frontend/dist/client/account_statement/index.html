@@ -1,0 +1,83 @@
+<!DOCTYPE html><html lang="en" data-astro-cid-dvz75727> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><meta name="generator" content="Astro v5.17.1"><title>Estado de Cuotas</title><link rel="stylesheet" href="/_astro/account_statement.CvkI6C00.css"></head> <body class="pt-16" data-astro-cid-dvz75727> <div id="notification" class="fixed p-4 top-4 right-4 rounded-2xl z-[60] hidden"> <p id="notification-title" class="font-bold text-lg">Error</p> <p id="notification-description">Hubo un error obteniendo las cuotas</p> </div> <!-- TODO: Menu movil --><nav class="bg-[#2563EB] text-white fixed top-0 left-0 right-0 z-50"> <div class="max-w-7xl mx-auto h-16 flex items-center justify-between"> <div class="flex items-center gap-2 h-full"> <!-- <img class="w-8 h-8" src={logoPng.src} alt="logo"> --> <h2 class="font-medium text-xl">Urb. Country Club Buenaventura</h2> </div> <div class="flex items-center gap-4"> <a id="nav-home-link" href="/" class="font-medium hover:underline">Inicio</a> </div> </div> </nav> <script type="module">const e=document.getElementById("nav-home-link");e&&fetch("/api/auth/user",{credentials:"include"}).then(n=>{n.ok&&(e.style.display="none")}).catch(()=>{});</script>  <div id="auth-div"> <div id="loading-text" class="flex flex-row gap-2 h-screen w-full justify-center items-center"> <div class="w-4 h-4 rounded-full bg-[#2563EB] animate-bounce [animation-delay:.7s]"></div> <div class="w-4 h-4 rounded-full bg-[#2563EB] animate-bounce [animation-delay:.3s]"></div> <div class="w-4 h-4 rounded-full bg-[#2563EB] animate-bounce [animation-delay:.7s]"></div> </div> <div id="auth-content" class="hidden">  <html lang="es"> <body class="bg-gray-100"> <nav class="fixed top-16 left-0 h-[calc(100vh-4rem)] w-45 bg-[#2563EB] text-white z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 sidebar"> <div class="flex flex-col h-full"> <h2 id="user-greeting" class="px-6 py-4 font-medium text-xl border-b border-blue-700"></h2> <ul class="flex-1 px-6 py-4 space-y-4"> <li><a class="block no-underline hover:underline" href="/inicio">Inicio</a></li> <li> <button id="usuario-toggle" class="w-full text-left block no-underline hover:underline font-semibold">Usuario ▼</button> <ul id="usuario-submenu" class="pl-4 mt-2 space-y-2 hidden"> <li><a class="block no-underline hover:underline" href="/account_statement">Estado de Cuenta</a></li> <li><a class="block no-underline hover:underline" href="/payment">Reportar Pago</a></li> </ul> </li> <li id="admin-section"> <button id="admin-toggle" class="w-full text-left block no-underline hover:underline font-semibold">Administrador ▼</button> <ul id="admin-submenu" class="pl-4 mt-2 space-y-2 hidden"> <li><a class="block no-underline hover:underline" href="/cuotas_status">Reportes</a></li> <li><a class="block no-underline hover:underline" href="/search">Buscar Usuario</a></li> <li><a class="block no-underline hover:underline" href="/cuotas">Agregar Cuota</a></li> </ul> </li> <li> <button id="logout-button" class="w-full text-left block no-underline hover:underline">Salir</button> </li> </ul> </div> </nav> <button class="fixed top-4 left-4 z-60 p-2 rounded-md bg-white text-blue-600 shadow-md sidebar-toggle lg:hidden" aria-label="Abrir menú"> <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path> </svg> </button> <script>
+      if (typeof window !== 'undefined') {
+        // Definimos la lógica como una función asíncrona para poder usar 'await'
+        const initializeSidebar = async () => {
+          const sidebar = document.querySelector('.sidebar');
+          const toggle = document.querySelector('.sidebar-toggle');
+          if (sidebar && toggle) {
+            toggle.addEventListener('click', () => {
+              sidebar.classList.toggle('-translate-x-full');
+              sidebar.classList.toggle('translate-x-0');
+            });
+          }
+
+          // Lógica para mostrar/ocultar el menú de administrador
+          const adminSection = document.getElementById('admin-section');
+          const greetingElement = document.getElementById('user-greeting');
+          
+          try {
+            // El navegador envía automáticamente la cookie httpOnly con esta petición
+            const response = await fetch('/api/auth/user', {
+              credentials: 'include', // Envía las cookies incluso en peticiones cross-origin
+            });
+            
+            if (response.ok) {
+              const user = await response.json();
+              // DEBUG: Muestra el usuario obtenido del backend
+              console.log('Usuario obtenido de /api/auth/user:', user);
+
+              if (greetingElement && user.email) {
+                const username = user.email.split('@')[0];
+                greetingElement.textContent = `Bienvenido, ${username}`;
+              }
+              
+              // Ocultar la sección si el usuario no es admin
+              if (adminSection && !user.is_admin) {
+                adminSection.style.display = 'none';
+              }
+            } else {
+              // Si la petición falla (ej. 401 Unauthorized), el usuario no tiene sesión
+              console.log('No hay sesión de usuario activa.');
+              if (adminSection) {
+                adminSection.style.display = 'none';
+              }
+            }
+          } catch (error) {
+            console.error('Error al obtener datos del usuario:', error);
+            if (adminSection) {
+              adminSection.style.display = 'none';
+            }
+          }
+          
+          // Submenú Usuario
+          const usuarioToggle = document.getElementById('usuario-toggle');
+          const usuarioSubmenu = document.getElementById('usuario-submenu');
+          if (usuarioToggle && usuarioSubmenu) {
+            usuarioToggle.addEventListener('click', () => {
+              usuarioSubmenu.classList.toggle('hidden');
+            });
+          }
+          
+          // Submenú Administrador
+          const adminToggle = document.getElementById('admin-toggle');
+          const adminSubmenu = document.getElementById('admin-submenu');
+          if (adminToggle && adminSubmenu) {
+            adminToggle.addEventListener('click', () => {
+              adminSubmenu.classList.toggle('hidden');
+            });
+          }
+
+          // Lógica para el botón de logout
+          const logoutButton = document.getElementById('logout-button');
+          if (logoutButton) {
+            logoutButton.addEventListener('click', async () => {
+              await fetch('/api/auth/logout', { credentials: 'include' });
+              // Redirigir al home después de cerrar sesión
+              window.location.href = '/';
+            });
+          }
+        };
+
+        window.addEventListener('DOMContentLoaded', initializeSidebar);
+      }
+    </script> </body> </html> <main class="min-h-[calc(100vh-4rem)] flex flex-col gap-8 p-4 max-w-[90rem] mx-auto md:items-center"> <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Estado de cuenta</h1> <!-- Tabla de mensualidades pendientes --> <section class="w-full max-w-2xl"> <h2 class="text-lg font-semibold mb-2 px-4">Resumen</h2> <div class="w-full border border-gray-900 dark:border-gray-200 rounded-md overflow-hidden "> <table class="w-full text-gray-800 dark:text-white"> <tbody id="resumen-tbody"> <tr> <td class="py-2 px-4 font-medium text-gray-900 dark:text-white">Cuotas pendientes</td> <td class="py-2 px-4 text-right" id="resumen-cantidad">-</td> </tr> <tr> <td class="py-2 px-4 font-medium text-gray-900 dark:text-white">Monto de la última cuota por pagar</td> <td class="py-2 px-4 text-right" id="resumen-ultima">-</td> </tr> <tr> <td class="py-2 px-4 font-medium text-gray-900 dark:text-white">Total de las cuotas pendientes</td> <td class="py-2 px-4 text-right" id="resumen-total">-</td> </tr> </tbody> </table> </div> </section> <!-- Cuotas pendientes --> <section class="w-full max-w-2xl mt-8"> <h2 class="text-lg font-bold mb-2">Cuotas pendientes</h2> <div class="flex w-full text-gray-800 dark:text-white mb-2"> <span class="w-1/3 ">Mes</span> <span class="w-1/3">Fecha</span> <span class="w-1/3">Fecha Limite</span> <span class="w-1/3">Monto $</span> </div> <ul id="cuotas-pendientes-list" class="m-0 p-2 list-none overflow-auto flex flex-col gap-8 rounded-md border  border-gray-900 dark:border-gray-200 h-full"> <!-- Aquí se mostrarán las cuotas pendientes --> </ul> <div id="pendientes-loading" class="text-center py-4 hidden">Cargando cuotas...</div> <div id="pendientes-error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">Error al cargar las cuotas</div> <div id="pendientes-empty" class="hidden text-center py-4 mb-5">No hay cuotas pendientes por pagar</div> </section> <!-- Cuotas pagadas --> <section class="w-full max-w-2xl mt-8"> <h2 class="text-lg font-semibold mb-2">Cuotas pagadas</h2> <ul id="cuotas-pagadas-list" class="m-0 p-2 list-none overflow-auto flex flex-col gap-8 rounded-md border border-green-300 h-full"> <!-- Aquí se mostrarán las cuotas pagadas --> </ul> <div id="pagadas-loading" class="text-center py-4 hidden">Cargando cuotas...</div> <div id="pagadas-error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">Error al cargar las cuotas</div> <div id="pagadas-empty" class="hidden text-center py-4">No hay cuotas pagadas</div> </section> <script type="module" src="/_astro/account_statement.astro_astro_type_script_index_0_lang.Cb9YIV98.js"></script> </main> </div> </div> <script type="module" src="/_astro/AuthProtected.astro_astro_type_script_index_0_lang.Hfj5zOBN.js"></script>  </body></html>

@@ -1,0 +1,275 @@
+---
+import Layout from "../layouts/layouts.astro";
+---
+
+<Layout title="Signup">
+  <img src="/Garita Urb.jpg" alt="" class="fixed inset-0 w-full h-full object-cover -z-10 opacity-90 dark:opacity-50 blur" />
+  <main class="h-[calc(100vh-4rem)] flex flex-col gap-8 p-4 max-w-[90rem] mx-auto items-center justify-center">
+    <div class="w-full max-w-md p-2 md:px-8 space-y-3 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-xl dark:shadow-gray-900">
+      <h1 class="text-2xl font-bold text-center text-gray-900 dark:text-white">Crea tu cuenta</h1>
+
+      <form id="signup-form" class="space-y-6" novalidate>
+      
+        <div>
+          <label for="email" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Correo</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="tu.email@ejemplo.com"
+            class="w-full px-4 py-2 text-gray-900 bg-gray-50 border rounded-lg focus:ring-blue-500 focus:outline-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors duration-200"
+          />
+          <p id="email-helper" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            Por favor ingresa una direccion de correo valida.
+          </p>
+        </div>
+
+        <!-- House Number Field -->
+        <div>
+          <label for="house-number" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Número de casa</label>
+          <input
+            type="text"
+            id="house-number"
+            name="house-number"
+            placeholder="Q-###"
+            class="w-full px-4 py-2 text-gray-900 bg-gray-50 border rounded-lg focus:ring-blue-500 focus:outline-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors duration-200"
+          />
+          <p id="house-number-helper" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            Ingresa el número de casa (ejemplo: Q-###).<br> (Recuerda el guion despues de la letra mayuscula).            
+          </p>
+        </div>
+
+        <!-- Password Field -->
+        <div>
+          <label for="password" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Contraseña</label>
+          <div class="relative">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="••••••••"
+              class="w-full px-4 py-2 pr-10 text-gray-900 bg-gray-50 border rounded-lg focus:ring-blue-500 focus:outline-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors duration-200"
+            />
+            <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none">
+              <svg id="eye-icon-password" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <svg id="eye-off-icon-password" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 hidden">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.452 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+              </svg>
+            </button>
+          </div>
+          <p id="password-helper" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            Debe tener al menos 6 caracteres e incluir una letra, un número y un carácter especial (!@#$%^&*-).
+          </p>
+        </div>
+
+        <!-- Verify Password Field -->
+        <div>
+          <label for="verify-password" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Verificar contraseña</label>
+          <div class="relative">
+            <input
+              type="password"
+              id="verify-password"
+              name="verify-password"
+              placeholder="••••••••"
+              class="w-full px-4 py-2 pr-10 text-gray-900 bg-gray-50 border rounded-lg focus:ring-blue-500 focus:outline-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors duration-200"
+            />
+            <button type="button" id="toggle-verify-password" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none">
+              <svg id="eye-icon-verify" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <svg id="eye-off-icon-verify" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 hidden">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.452 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+              </svg>
+            </button>
+          </div>
+          <p id="verify-password-helper" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            La contraseña tiene que coincidir.
+          </p>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          id="submit-button"
+          disabled
+          class="w-full px-5 py-3 text-base font-medium text-center text-white bg-[#2563EB] rounded-lg hover:bg-[#4077ED]focus:ring-4 focus:ring-green-300 disabled:bg-gray-600 disabled:cursor-not-allowed dark:bg-[#2563EB] dark:hover:bg-[#4077ED] dark:focus:ring-blue-800 dark:disabled:bg-gray-600 transition-colors duration-200"
+        >
+          Registrarse
+        </button>
+
+        <p id="information-text" class="mt-2 text-base text-black-300 dark:text-gray-200">¿Ya tienes cuenta? <a href="/login" class="text-blue-600 underline hover:text-blue-800" >Iniciar Sesion</a></p>
+        
+      </form>
+    </div>
+  </main>
+</Layout>
+
+<style>
+    input[type="password"]::-ms-reveal,
+    input[type="password"]::-ms-clear {
+      display: none;
+    }
+  </style>
+
+<script>
+// @ts-nocheck
+  import { BACK_ENDPOINT } from "../config/endpoints";
+  import { createNotification } from "../features/notifications/notificiation";
+  import ky from 'ky';
+
+  // DOM Element Selection
+  const form = document.querySelector('#signup-form');
+  const emailInput = document.querySelector('#email');
+  const passwordInput = document.querySelector('#password');
+  const verifyPasswordInput = document.querySelector('#verify-password');
+  const houseNumberInput = document.querySelector('#house-number');
+  const submitButton = document.querySelector('#submit-button');
+
+  // Toggle Password Visibility
+  const togglePasswordBtn = document.querySelector('#toggle-password');
+  const eyeIconPassword = document.querySelector('#eye-icon-password');
+  const eyeOffIconPassword = document.querySelector('#eye-off-icon-password');
+
+  const toggleVerifyPasswordBtn = document.querySelector('#toggle-verify-password');
+  const eyeIconVerify = document.querySelector('#eye-icon-verify');
+  const eyeOffIconVerify = document.querySelector('#eye-off-icon-verify');
+
+  // Helper elements
+  const emailHelper = document.querySelector('#email-helper');
+  const passwordHelper = document.querySelector('#password-helper');
+  const verifyPasswordHelper = document.querySelector('#verify-password-helper');
+  const houseNumberHelper = document.querySelector('#house-number-helper');
+
+  // Validation Regular Expressions
+  const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+  // At least 1 letter, 1 number, 1 special character, and minimum 6 characters.
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&\-])[A-Za-z\d@$!%*#?&\-]{6,}$/;
+
+  // Validation State
+  const validationState = {
+    isEmailValid: false,
+    isPasswordValid: false,
+    doPasswordsMatch: false,
+    isHouseNumberValid: false,
+  };
+
+  // Helper Function to Update Input Visuals
+  function updateInputValidationUI(inputElement, isValid, helperElement) {
+    if (isValid) {
+      // Use Tailwind classes for valid state: green border
+      inputElement.classList.remove('border-red-500', 'dark:border-red-500');
+      inputElement.classList.add('border-green-500', 'dark:border-green-500');
+    } else {
+      // Use Tailwind classes for invalid state: red border
+      inputElement.classList.remove('border-green-500', 'dark:border-green-500');
+      inputElement.classList.add('border-red-500', 'dark:border-red-500');
+    }
+    // Reset border color if the input is empty
+    if (inputElement.value === '') {
+      inputElement.classList.remove('border-red-500', 'dark:border-red-500', 'border-green-500', 'dark:border-green-500');
+    }
+  }
+
+  togglePasswordBtn?.addEventListener('click', () => {
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    eyeIconPassword.classList.toggle('hidden');
+    eyeOffIconPassword.classList.toggle('hidden');
+  });
+
+  toggleVerifyPasswordBtn?.addEventListener('click', () => {
+    const type = verifyPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    verifyPasswordInput.setAttribute('type', type);
+    eyeIconVerify.classList.toggle('hidden');
+    eyeOffIconVerify.classList.toggle('hidden');
+  });
+
+  // Master Validation Function
+  function validateForm() {
+    const { isEmailValid, isPasswordValid, doPasswordsMatch, isHouseNumberValid } = validationState;
+    // Enable the button only if all validation checks pass
+    submitButton.disabled = !isEmailValid || !isPasswordValid || !doPasswordsMatch || !isHouseNumberValid;
+  }
+  // 0. House Number Validation
+  const houseNumberRegex = /^[A-Z]-\d{2,3}$/;
+  houseNumberInput.addEventListener('input', () => {
+    const isValid = houseNumberRegex.test(houseNumberInput.value.trim());
+    houseNumberInput.value = houseNumberInput.value.toUpperCase(); //Convertir a mayusculas
+    validationState.isHouseNumberValid = isValid;
+    updateInputValidationUI(houseNumberInput, isValid, houseNumberHelper);
+    validateForm();
+  });
+
+  // Event Listeners for Real-time Validation
+
+  // 1. Email Validation
+  emailInput.addEventListener('input', () => {
+    const isValid = emailRegex.test(emailInput.value);
+    validationState.isEmailValid = isValid;
+    updateInputValidationUI(emailInput, isValid, emailHelper);
+    validateForm();
+  });
+
+  // 2. Password Strength Validation
+  passwordInput.addEventListener('input', () => {
+    const isValid = passwordRegex.test(passwordInput.value);
+    validationState.isPasswordValid = isValid;
+    updateInputValidationUI(passwordInput, isValid, passwordHelper);
+
+    const passwordsMatch = passwordInput.value === verifyPasswordInput.value && verifyPasswordInput.value.length > 0;
+    validationState.doPasswordsMatch = passwordsMatch;
+    updateInputValidationUI(verifyPasswordInput, passwordsMatch, verifyPasswordHelper);
+
+    validateForm();
+  });
+
+  // 3. Verify Password Match Validation
+  verifyPasswordInput.addEventListener('input', () => {
+    const isValid = passwordInput.value === verifyPasswordInput.value && verifyPasswordInput.value.length > 0;
+    validationState.doPasswordsMatch = isValid;
+    updateInputValidationUI(verifyPasswordInput, isValid, verifyPasswordHelper);
+    validateForm();
+  });
+
+  // Form Submission
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault(); 
+    const { isEmailValid, isPasswordValid, doPasswordsMatch, isHouseNumberValid } = validationState;
+    if ( !isEmailValid || !isPasswordValid || !doPasswordsMatch || !isHouseNumberValid) return;
+
+    try {
+      await ky.post(`${BACK_ENDPOINT}/api/users`, {
+        json: {
+          email: emailInput.value,
+          passwordHash: passwordInput.value,
+          house_number: houseNumberInput.value
+        }
+      });
+      // Reinciar todos los estados del formulario
+      for (const key in validationState) {
+        validationState[key] = false;
+      }
+      form.reset();
+      [emailInput, passwordInput, verifyPasswordInput, houseNumberInput].forEach(input => {
+        updateInputValidationUI(input);
+      });
+      validateForm();
+      createNotification({ 
+        title: 'Usuario creado!', 
+        description: 'Se ha enviado un correo de verificacion a su bandeja de correo', 
+        type: 'success'
+      });
+    } catch (error) {
+      const errorData = await error?.response?.json();
+      createNotification({ 
+        title: 'Ups! Hubo un error', 
+        description: errorData?.error ?? 'Sin mensaje', 
+        type: 'error'
+      });
+    }  
+  });
+</script>

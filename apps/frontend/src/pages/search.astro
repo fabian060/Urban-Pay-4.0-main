@@ -1,0 +1,176 @@
+---
+import AuthProtected from "../features/auth/AuthProtected.astro"
+import Layout from "../layouts/layouts.astro"
+import Sidebar from '../components/Sidebar.astro';
+---
+
+<Layout title="Buscar Usuarios">
+  <AuthProtected>
+    <div class="flex min-h-[calc(100vh-4rem)] bg-gray-100 dark:bg-gray-900">
+      <Sidebar />
+      <main class="flex flex-col gap-8 p-4 max-w-[90rem] mx-auto md:items-center w-full">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Buscar Usuarios</h1>
+        <form id="search-form" class="flex gap-2 items-center">
+          <input id="house-number" type="text" placeholder="Número de casa" class="border p-2 rounded" required />
+          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Buscar</button>
+        </form>
+        <div id="results-container" class="w-full md:w-[70%] lg:w-[50%] mt-4"></div>
+        <div id="loading" class="hidden text-center py-8">
+          <p>Cargando usuarios...</p>
+        </div>
+        <div id="error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <p>Error al cargar los usuarios</p>
+        </div>
+        <div id="empty" class="hidden text-center py-8">
+          <p>No se encontraron usuarios para ese número de casa</p>
+        </div>
+      </main>
+    </div>
+  </AuthProtected>
+</Layout>
+
+<script>
+  // @ts-nocheck
+  import ky from "ky";
+  import { BACK_ENDPOINT } from "../config/endpoints";
+  import { createNotification } from "../features/notifications/notificiation.js";
+
+  const form = document.getElementById('search-form');
+  const houseInput = document.getElementById('house-number');
+  const resultsContainer = document.getElementById('results-container');
+  const loadingElement = document.getElementById('loading');
+  const errorElement = document.getElementById('error');
+  const emptyElement = document.getElementById('empty');
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const houseNumber = houseInput.value.trim();
+    if (!houseNumber) return;
+
+    // Hide others, show loading
+    resultsContainer.innerHTML = '';
+    loadingElement.classList.remove('hidden');
+    errorElement.classList.add('hidden');
+    emptyElement.classList.add('hidden');
+
+    try {
+      const users = await ky.get(`${BACK_ENDPOINT}/api/users/search?house_number=${encodeURIComponent(houseNumber)}`, {
+        credentials: 'include'
+      }).json();
+
+      loadingElement.classList.add('hidden');
+
+      if (users.length === 0) {
+        emptyElement.classList.remove('hidden');
+      } else {
+        // Assuming one user per house number, take the first
+        const user = users[0];
+        await displayAccountStatement(user);
+      }
+    } catch (error) {
+      loadingElement.classList.add('hidden');
+      errorElement.classList.remove('hidden');
+      console.error('Error searching users:', error);
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        location.replace('/login');
+      }
+    }
+  });
+
+  async function displayAccountStatement(user) {
+    resultsContainer.innerHTML = '';
+
+    try {
+      // Obtener todas las cuotas y pagos del usuario
+      const [cuotas, pagos] = await Promise.all([
+        ky.get(`${BACK_ENDPOINT}/api/cuotas`, { credentials: 'include' }).json(),
+        ky.get(`${BACK_ENDPOINT}/api/payment?user_id=${user.id}`, { credentials: 'include' }).json()
+      ]);
+
+      // Filtrar pagos aceptados
+      const pagosAceptados = pagos.filter(pago => pago.status === 'accepted');
+      const cuotasPagadasIds = pagosAceptados.map(pago => pago.cuota_id);
+
+      // Mostrar resumen
+      const pendientes = cuotas.filter(cuota => !cuotasPagadasIds.includes(cuota.id));
+      const resumenHTML = `
+        <section class="w-full max-w-2xl">
+          <h2 class="text-lg font-semibold mb-2">Resumen</h2>
+          <table class="w-full border border-gray-300 rounded-lg overflow-hidden">
+            <tbody>
+              <tr>
+                <td class="py-2 px-4 font-medium text-gray-200">Cuotas pendientes</td>
+                <td class="py-2 px-4 text-right">${pendientes.length}</td>
+              </tr>
+              <tr>
+                <td class="py-2 px-4 font-medium text-gray-200">Monto de la última cuota por pagar</td>
+                <td class="py-2 px-4 text-right">${pendientes.length > 0 ? pendientes[pendientes.length - 1].monto + '$' : '-'}</td>
+              </tr>
+              <tr>
+                <td class="py-2 px-4 font-medium text-gray-200">Total de las cuotas pendientes</td>
+                <td class="py-2 px-4 text-right">${pendientes.reduce((acc, cuota) => acc + Number(cuota.monto), 0) + '$'}</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      `;
+      resultsContainer.insertAdjacentHTML('beforeend', resumenHTML);
+
+      // Mostrar cuotas pendientes
+      const pendientesHTML = `
+        <section class="w-full max-w-2xl mt-8">
+          <h2 class="text-lg font-bold mb-2">Cuotas pendientes</h2>
+          <div class="flex w-full text-gray-800 dark:text-white mb-2">
+            <span class="w-1/3">Mes</span>
+            <span class="w-1/3">Fecha</span>
+            <span class="w-1/3">Fecha Limite</span>
+            <span class="w-1/3">Monto $</span>
+          </div>
+          <ul class="m-0 p-2 list-none overflow-auto flex flex-col gap-8 rounded-md border border-gray-300 h-full">
+            ${pendientes.map(cuota => `
+              <li class="flex gap-4 justify-between items-center">
+                <div class="flex flex-wrap md:flex-nowrap gap-2 flex-grow">
+                  <input class="w-full bg-gray-500 rounded-md p-2 outline-none" type="text" value="${cuota.description}" readonly>
+                  <input class="w-full bg-gray-500 rounded-md p-2 outline-none" type="text" value="${cuota.date.split('T')[0]}" readonly>
+                  <input class="w-full bg-gray-500 rounded-md p-2 outline-none" type="text" value="${cuota.date_limit.split('T')[0]}" readonly>
+                  <input class="w-full bg-gray-500 rounded-md p-2 outline-none" type="text" value="${cuota.monto}" readonly>
+                </div>
+              </li>
+            `).join('')}
+          </ul>
+        </section>
+      `;
+      resultsContainer.insertAdjacentHTML('beforeend', pendientesHTML);
+
+      // Mostrar cuotas pagadas
+      const pagadas = cuotas.filter(cuota => cuotasPagadasIds.includes(cuota.id));
+      const pagadasHTML = `
+        <section class="w-full max-w-2xl mt-8">
+          <h2 class="text-lg font-semibold mb-2">Cuotas pagadas</h2>
+          <ul class="m-0 p-2 list-none overflow-auto flex flex-col gap-8 rounded-md border border-green-300 h-full">
+            ${pagadas.map(cuota => {
+              const pago = pagosAceptados.find(p => p.cuota_id === cuota.id);
+              const status = pago ? pago.status : '';
+              return `
+                <li class="flex gap-4 justify-between items-center">
+                  <div class="flex flex-wrap md:flex-nowrap gap-2 flex-grow">
+                    <input class="w-full bg-green-600 rounded-md p-2 outline-none" type="text" value="${cuota.description}" readonly>
+                    <input class="w-full bg-green-600 rounded-md p-2 outline-none" type="text" value="${cuota.date.split('T')[0]}" readonly>
+                    <input class="w-full bg-green-600 rounded-md p-2 outline-none" type="text" value="${cuota.date_limit.split('T')[0]}" readonly>
+                    <input class="w-full bg-green-600 rounded-md p-2 outline-none" type="text" value="${cuota.monto}" readonly>
+                    <input class="w-full bg-green-600 rounded-md p-2 outline-none font-bold" type="text" value="${status}" readonly>
+                  </div>
+                </li>
+              `;
+            }).join('')}
+          </ul>
+        </section>
+      `;   
+     resultsContainer.insertAdjacentHTML('beforeend', pagadasHTML);
+
+    } catch (error) {
+      console.error('Error loading account statement:', error);
+      resultsContainer.innerHTML = '<p>Error al cargar el estado de cuenta</p>';
+    }
+  }
+</script>

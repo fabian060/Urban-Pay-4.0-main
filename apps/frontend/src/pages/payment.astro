@@ -1,0 +1,235 @@
+---
+import AuthProtected from "../features/auth/AuthProtected.astro";
+import Layout from "../layouts/layouts.astro";
+import Sidebar from '../components/Sidebar.astro';
+---
+
+<Layout title="Reportar Pago">
+  <AuthProtected>
+    <div class="flex min-h-[calc(100vh-4rem)] bg-gray-100 dark:bg-gray-900">
+      <Sidebar />
+      <main class="flex flex-col md:flex-row gap-8 p-4 max-w-[90rem] mx-auto items-center">
+
+        <div class="w-full max-w-md p-4 space-y-4 bg-white dark:bg-gray-600/40 rounded-lg border border-gray-300 dark:border-gray-500">
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">DATOS</h2>
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Pago movil</h3>
+          <ul class="list-disc pl-5 text-gray-800 dark:text-gray-200 space-y-2">
+            <li>Banco: Venezuela</li>
+            <li>Telefono: 0424-1989711</li>
+            <li>CI: 31.448.916</li>
+          </ul>
+          <p class="text-sm text-gray-600 dark:text-gray-300">Realiza el pago usando los datos anteriores y reporta tu pago usando el formulario.</p>
+        </div>
+
+        <div class="w-full max-w-md p-4 md:px-8 space-y-3 bg-white dark:bg-gray-600/40 rounded-lg border border-gray-300 dark:border-gray-500">
+          <h1 class="text-2xl font-bold text-center text-gray-900 dark:text-white">Reportar pago</h1>
+          <form id="signup-form" class="space-y-6" novalidate>
+
+            <div>
+              <label for="payment_method" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Tipo de pago</label>
+              <select
+                id="payment_method"
+                name="payment_method"
+                class="w-full px-4 py-2 text-gray-900 bg-gray-50 border rounded-lg focus:ring-blue-500 focus:outline-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors duration-200 cursor-pointer">
+                <option value="">Elige una opción</option>
+                <option value="1">Pago Móvil</option>
+              </select>
+              <p id="payment-method-helper" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                Selecciona el tipo de método de pago.
+              </p>
+            </div>
+
+            <div>
+              <label for="verify-password" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Fecha</label>
+              <input
+                type="date"
+                id="date"
+                name="date"
+                placeholder="fecha"
+                class="w-full px-4 py-2 text-gray-900 bg-gray-50 border rounded-lg focus:ring-blue-500 focus:outline-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors duration-200 cursor-pointer
+                "
+              />
+              <p id="email-helper" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                La fecha en la realizaste el pago.
+              </p>
+            </div>
+
+            <div>
+              <label for="verify-password" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Numero de referencia</label>
+              <input
+                type="text"
+                id="payment_reference"
+                name="payment_reference"
+                placeholder="Numero de referencia"
+                class="w-full px-4 py-2 text-gray-900 bg-gray-50 border rounded-lg focus:ring-blue-500 focus:outline-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors duration-200"
+              />
+              <p id="email-helper" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                los ultimos cuatro numeros del numero de referencia.
+              </p>
+            </div>
+
+            <div>
+              <label for="verify-password" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Monto</label>
+              <input
+                type="number"
+                id="monto"
+                name="monto"
+                placeholder="Monto"
+                class="w-full px-4 py-2 text-gray-900 bg-gray-50 border rounded-lg focus:ring-blue-500 focus:outline-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors duration-200"
+              />
+              <p id="email-helper" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                Monto del pago realizado.
+              </p>
+            </div>
+
+
+            
+            <button
+              type="submit"
+              id="submit-button"
+              disabled
+              class="w-full px-5 py-3 text-base font-medium text-center text-white bg-[#2563EB] rounded-lg hover:bg-[#4077ED]focus:ring-4 focus:ring-green-300 disabled:bg-gray-600 disabled:cursor-not-allowed dark:bg-[#2563EB] dark:hover:bg-[#4077ED] dark:focus:ring-blue-800 dark:disabled:bg-gray-600 transition-colors duration-200"
+        >
+              Reportar pago
+            </button>
+          </form>
+        </div>
+      </main>
+    </div>
+  </AuthProtected>
+</Layout>
+
+<script>
+    // @ts-nocheck
+  import { BACK_ENDPOINT } from "../config/endpoints";
+  import { createNotification } from "../features/notifications/notificiation";
+  import ky from 'ky';
+
+  // DOM Element Selection
+  const form = document.querySelector('#signup-form');
+  const dateInput = document.querySelector('#date');
+  const paymentMethodSelect = document.querySelector('#payment_method');
+  const paymentReferenceInput = document.querySelector('#payment_reference');
+  const montoInput = document.querySelector('#monto');
+  const submitButton = document.querySelector('#submit-button');
+
+  // Validation Regular Expressions
+  const PAYMENT_REFERENCE_REGEX = /^\d{4}$/;
+  const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+  const MONTO_REGEX = /^\d+(\.\d{1,2})?$/;
+
+  // Validation State
+  const validationState = {
+    isDateValid: false,
+    isPaymentMethodValid: false,
+    isPaymentReferenceValid: false,
+    isMontoValid: false
+  };
+
+  dateInput.addEventListener('click', () => {
+    dateInput.showPicker();
+});
+
+  // Helper Function to Update Input Visuals
+  function updateInputValidationUI(inputElement, isValid, helperElement) {
+    if (isValid) {
+      // Use Tailwind classes for valid state: green border
+      inputElement.classList.remove('border-red-500', 'dark:border-red-500');
+      inputElement.classList.add('border-green-500', 'dark:border-green-500');
+    } else {
+      // Use Tailwind classes for invalid state: red border
+      inputElement.classList.remove('border-green-500', 'dark:border-green-500');
+      inputElement.classList.add('border-red-500', 'dark:border-red-500');
+    }
+    // Reset border color if the input is empty
+    if (inputElement.value === '') {
+      inputElement.classList.remove('border-red-500', 'dark:border-red-500', 'border-green-500', 'dark:border-green-500');
+    }
+  }
+
+  // Master Validation Function
+  function validateForm() {
+    const { isDateValid, isPaymentMethodValid, isPaymentReferenceValid, isMontoValid} = validationState;
+    // Enable the button only if all validation checks pass
+    submitButton.disabled = !isDateValid || !isPaymentMethodValid || !isPaymentReferenceValid || !isMontoValid;
+  }
+
+  // Event Listeners for Real-time Validation
+
+  // 1. Payment Method Validation
+  paymentMethodSelect.addEventListener('change', () => {
+    const isValid = paymentMethodSelect.value !== '';
+    validationState.isPaymentMethodValid = isValid;
+    updateInputValidationUI(paymentMethodSelect, isValid);
+    validateForm();
+  });
+
+  // 2. Date Validation
+  dateInput.addEventListener('input', () => {
+    const isValid = DATE_REGEX.test(dateInput.value);
+    validationState.isDateValid = isValid;
+    updateInputValidationUI(dateInput, isValid);
+    validateForm();
+  });
+
+  // 3. Payment Reference Validation
+  paymentReferenceInput.addEventListener('input', () => {
+    const isValid = PAYMENT_REFERENCE_REGEX.test(paymentReferenceInput.value);
+    validationState.isPaymentReferenceValid = isValid;
+    updateInputValidationUI(paymentReferenceInput, isValid);
+
+    validateForm();
+  });
+
+  // 4. Monto Validation
+  montoInput.addEventListener('input', () => {
+    const isValid = MONTO_REGEX.test(montoInput.value);
+    validationState.isMontoValid = isValid;
+    updateInputValidationUI(montoInput, isValid);
+
+    validateForm();
+  });
+
+  // Form Submission
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const { isDateValid, isPaymentMethodValid, isPaymentReferenceValid, isMontoValid} = validationState;
+    if ( !isDateValid || !isPaymentMethodValid || !isPaymentReferenceValid || !isMontoValid) return;
+
+    const payload = {
+      date: dateInput.value,
+      payment_reference: paymentReferenceInput.value,
+      cuota_id: null, // <-- Cambia esto si tienes el id de la cuota
+      payment_methods_id: paymentMethodSelect.value, // Usar el valor seleccionado del método de pago
+      monto: montoInput.value
+    };
+
+    try {
+      await ky.post(`${BACK_ENDPOINT}/api/payment`, {
+        json: payload,
+        credentials: 'include'
+      });
+      // Reinciar todos los estados del formulario
+      for (const key in validationState) {
+        validationState[key] = false;
+      }
+      form.reset();
+      [dateInput, paymentMethodSelect, paymentReferenceInput, montoInput].forEach(input => {
+        updateInputValidationUI(input);
+      });
+      validateForm();
+      createNotification({ 
+        title: 'Pago reportado exitosamente!', 
+        description: 'Nuestro equipo revisara el pago.', 
+        type: 'success'
+      });
+    } catch (error) {
+      const errorData = await error?.response?.json();
+      createNotification({ 
+        title: 'Ups! Hubo un error', 
+        description: errorData?.error ?? 'Sin mensaje', 
+        type: 'error'
+      });
+    }  
+  });
+</script>

@@ -1,0 +1,37 @@
+---
+// import logoPng from '../assets/logo.png'
+---
+
+<!-- TODO: Menu movil -->
+<nav class="bg-[#2563EB] text-white fixed top-0 left-0 right-0 z-50">
+    <div class="max-w-7xl mx-auto h-16 flex items-center justify-between px-4">
+      <div class="flex items-center gap-2 h-full min-w-0">
+        <button id="sidebar-toggle-button" class="p-2 rounded-md bg-white text-blue-600 shadow-md sidebar-toggle lg:hidden mr-2 hidden" aria-label="Abrir menú">
+          <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
+        <!-- <img class="w-8 h-8" src={logoPng.src} alt="logo"> -->
+        <h2 class="font-medium text-xl truncate">Urb. Country Club Buenaventura</h2>
+      </div>
+      <div class="hidden md:flex items-center gap-4">
+        <a id="nav-home-link" href="/" class="font-medium hover:underline">Inicio</a>
+      </div>
+    </div>
+</nav>
+
+<script>
+  const homeLink = document.getElementById('nav-home-link');
+  const sidebarToggleButton = document.getElementById('sidebar-toggle-button');
+
+  if (homeLink && sidebarToggleButton) {
+    fetch('/api/auth/user', { credentials: 'include' })
+      .then((res) => {
+        if (res.ok) {
+          homeLink.style.display = 'none';
+          sidebarToggleButton.classList.remove('hidden');
+        }
+      })
+      .catch(() => {});
+  }
+</script>

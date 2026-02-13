@@ -1,0 +1,25 @@
+import { e as createComponent, k as renderComponent, l as renderScript, r as renderTemplate, m as maybeRenderHead } from '../chunks/astro/server_CsuFGHyV.mjs';
+import 'piccolore';
+import { $ as $$Layouts } from '../chunks/layouts_DxcNah2t.mjs';
+/* empty css                                 */
+export { renderers } from '../renderers.mjs';
+
+const $$Login = createComponent(async ($$result, $$props, $$slots) => {
+  return renderTemplate`${renderComponent($$result, "Layout", $$Layouts, { "data-astro-cid-sgpqyurt": true }, { "default": async ($$result2) => renderTemplate` ${maybeRenderHead()}<img src="/Garita Urb.jpg" alt="" class="fixed inset-0 w-full h-full object-cover -z-10 opacity-90 dark:opacity-50 blur" data-astro-cid-sgpqyurt> <main class="h-[calc(100vh-4rem)] flex flex-col gap-8 p-4 max-w-[90rem] mx-auto items-center justify-center" data-astro-cid-sgpqyurt> <div class="w-full max-w-md p-4 md:px-8 space-y-6 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-xl dark:shadow-gray-900" data-astro-cid-sgpqyurt> <h1 class="text-2xl font-bold text-center text-gray-900 dark:text-white" data-astro-cid-sgpqyurt>Inicia sesión</h1> <form id="signup-form" class="space-y-6" novalidate data-astro-cid-sgpqyurt> <!-- Email Field --> <div data-astro-cid-sgpqyurt> <label for="email" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300" data-astro-cid-sgpqyurt>Correo</label> <input type="email" id="email" name="email" class="w-full px-4 py-2 text-gray-900 bg-gray-50 border rounded-lg focus:ring-blue-500 focus:outline-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors duration-200" data-astro-cid-sgpqyurt> </div> <!-- Password Field --> <div data-astro-cid-sgpqyurt> <label for="password" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300" data-astro-cid-sgpqyurt>Contraseña</label> <div class="relative" data-astro-cid-sgpqyurt> <input type="password" id="password" name="password" class="w-full px-4 py-2 pr-10 text-gray-900 bg-gray-50 border rounded-lg focus:ring-blue-500 focus:outline-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white transition-colors duration-200" data-astro-cid-sgpqyurt> <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none" data-astro-cid-sgpqyurt> <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" data-astro-cid-sgpqyurt> <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" data-astro-cid-sgpqyurt></path> <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" data-astro-cid-sgpqyurt></path> </svg> <svg id="eye-off-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 hidden" data-astro-cid-sgpqyurt> <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.452 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" data-astro-cid-sgpqyurt></path> </svg> </button> </div> </div> <!-- Submit Button --> <button type="submit" id="submit-button" class="w-full px-5 py-3 text-base font-medium text-center text-white bg-[#2563EB] rounded-lg hover:bg-[#4077ED]  focus:ring-4 focus:ring-blue-300 disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-[#2563EB] dark:hover:bg-[#4077ED] dark:focus:ring-blue-800 dark:disabled:bg-gray-600 transition-colors duration-200" data-astro-cid-sgpqyurt>
+Iniciar sesión
+</button> <p id="information-text" class="mt-2 text-base text-black-300 dark:text-gray-200" data-astro-cid-sgpqyurt>¿No tienes cuenta? <a href="/signup" class="text-blue-600 underline hover:text-blue-800" data-astro-cid-sgpqyurt>Registrarse</a></p> </form> </div> </main> ` })}  ${renderScript($$result, "C:/Users/fabia/Desktop/Fabian Proyectos/Urban-Pay-4.0-main/apps/frontend/src/pages/login.astro?astro&type=script&index=0&lang.ts")}`;
+}, "C:/Users/fabia/Desktop/Fabian Proyectos/Urban-Pay-4.0-main/apps/frontend/src/pages/login.astro", void 0);
+
+const $$file = "C:/Users/fabia/Desktop/Fabian Proyectos/Urban-Pay-4.0-main/apps/frontend/src/pages/login.astro";
+const $$url = "/login";
+
+const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: $$Login,
+  file: $$file,
+  url: $$url
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const page = () => _page;
+
+export { page };

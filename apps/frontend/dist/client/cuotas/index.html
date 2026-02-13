@@ -1,0 +1,83 @@
+<!DOCTYPE html><html lang="en" data-astro-cid-dvz75727> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><meta name="generator" content="Astro v5.17.1"><title>App</title><link rel="stylesheet" href="/_astro/account_statement.CvkI6C00.css"></head> <body class="pt-16" data-astro-cid-dvz75727> <div id="notification" class="fixed p-4 top-4 right-4 rounded-2xl z-[60] hidden"> <p id="notification-title" class="font-bold text-lg">Error</p> <p id="notification-description">Hubo un error obteniendo las cuotas</p> </div> <!-- TODO: Menu movil --><nav class="bg-[#2563EB] text-white fixed top-0 left-0 right-0 z-50"> <div class="max-w-7xl mx-auto h-16 flex items-center justify-between"> <div class="flex items-center gap-2 h-full"> <!-- <img class="w-8 h-8" src={logoPng.src} alt="logo"> --> <h2 class="font-medium text-xl">Urb. Country Club Buenaventura</h2> </div> <div class="flex items-center gap-4"> <a id="nav-home-link" href="/" class="font-medium hover:underline">Inicio</a> </div> </div> </nav> <script type="module">const e=document.getElementById("nav-home-link");e&&fetch("/api/auth/user",{credentials:"include"}).then(n=>{n.ok&&(e.style.display="none")}).catch(()=>{});</script>  <div id="auth-div"> <div id="loading-text" class="flex flex-row gap-2 h-screen w-full justify-center items-center"> <div class="w-4 h-4 rounded-full bg-[#2563EB] animate-bounce [animation-delay:.7s]"></div> <div class="w-4 h-4 rounded-full bg-[#2563EB] animate-bounce [animation-delay:.3s]"></div> <div class="w-4 h-4 rounded-full bg-[#2563EB] animate-bounce [animation-delay:.7s]"></div> </div> <div id="auth-content" class="hidden">  <html lang="es"> <body class="bg-gray-100"> <nav class="fixed top-16 left-0 h-[calc(100vh-4rem)] w-45 bg-[#2563EB] text-white z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 sidebar"> <div class="flex flex-col h-full"> <h2 id="user-greeting" class="px-6 py-4 font-medium text-xl border-b border-blue-700"></h2> <ul class="flex-1 px-6 py-4 space-y-4"> <li><a class="block no-underline hover:underline" href="/inicio">Inicio</a></li> <li> <button id="usuario-toggle" class="w-full text-left block no-underline hover:underline font-semibold">Usuario ▼</button> <ul id="usuario-submenu" class="pl-4 mt-2 space-y-2 hidden"> <li><a class="block no-underline hover:underline" href="/account_statement">Estado de Cuenta</a></li> <li><a class="block no-underline hover:underline" href="/payment">Reportar Pago</a></li> </ul> </li> <li id="admin-section"> <button id="admin-toggle" class="w-full text-left block no-underline hover:underline font-semibold">Administrador ▼</button> <ul id="admin-submenu" class="pl-4 mt-2 space-y-2 hidden"> <li><a class="block no-underline hover:underline" href="/cuotas_status">Reportes</a></li> <li><a class="block no-underline hover:underline" href="/search">Buscar Usuario</a></li> <li><a class="block no-underline hover:underline" href="/cuotas">Agregar Cuota</a></li> </ul> </li> <li> <button id="logout-button" class="w-full text-left block no-underline hover:underline">Salir</button> </li> </ul> </div> </nav> <button class="fixed top-4 left-4 z-60 p-2 rounded-md bg-white text-blue-600 shadow-md sidebar-toggle lg:hidden" aria-label="Abrir menú"> <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path> </svg> </button> <script>
+      if (typeof window !== 'undefined') {
+        // Definimos la lógica como una función asíncrona para poder usar 'await'
+        const initializeSidebar = async () => {
+          const sidebar = document.querySelector('.sidebar');
+          const toggle = document.querySelector('.sidebar-toggle');
+          if (sidebar && toggle) {
+            toggle.addEventListener('click', () => {
+              sidebar.classList.toggle('-translate-x-full');
+              sidebar.classList.toggle('translate-x-0');
+            });
+          }
+
+          // Lógica para mostrar/ocultar el menú de administrador
+          const adminSection = document.getElementById('admin-section');
+          const greetingElement = document.getElementById('user-greeting');
+          
+          try {
+            // El navegador envía automáticamente la cookie httpOnly con esta petición
+            const response = await fetch('/api/auth/user', {
+              credentials: 'include', // Envía las cookies incluso en peticiones cross-origin
+            });
+            
+            if (response.ok) {
+              const user = await response.json();
+              // DEBUG: Muestra el usuario obtenido del backend
+              console.log('Usuario obtenido de /api/auth/user:', user);
+
+              if (greetingElement && user.email) {
+                const username = user.email.split('@')[0];
+                greetingElement.textContent = `Bienvenido, ${username}`;
+              }
+              
+              // Ocultar la sección si el usuario no es admin
+              if (adminSection && !user.is_admin) {
+                adminSection.style.display = 'none';
+              }
+            } else {
+              // Si la petición falla (ej. 401 Unauthorized), el usuario no tiene sesión
+              console.log('No hay sesión de usuario activa.');
+              if (adminSection) {
+                adminSection.style.display = 'none';
+              }
+            }
+          } catch (error) {
+            console.error('Error al obtener datos del usuario:', error);
+            if (adminSection) {
+              adminSection.style.display = 'none';
+            }
+          }
+          
+          // Submenú Usuario
+          const usuarioToggle = document.getElementById('usuario-toggle');
+          const usuarioSubmenu = document.getElementById('usuario-submenu');
+          if (usuarioToggle && usuarioSubmenu) {
+            usuarioToggle.addEventListener('click', () => {
+              usuarioSubmenu.classList.toggle('hidden');
+            });
+          }
+          
+          // Submenú Administrador
+          const adminToggle = document.getElementById('admin-toggle');
+          const adminSubmenu = document.getElementById('admin-submenu');
+          if (adminToggle && adminSubmenu) {
+            adminToggle.addEventListener('click', () => {
+              adminSubmenu.classList.toggle('hidden');
+            });
+          }
+
+          // Lógica para el botón de logout
+          const logoutButton = document.getElementById('logout-button');
+          if (logoutButton) {
+            logoutButton.addEventListener('click', async () => {
+              await fetch('/api/auth/logout', { credentials: 'include' });
+              // Redirigir al home después de cerrar sesión
+              window.location.href = '/';
+            });
+          }
+        };
+
+        window.addEventListener('DOMContentLoaded', initializeSidebar);
+      }
+    </script> </body> </html> <main class="h-[calc(100vh-4rem)] flex flex-col gap-8 p-4 max-w-[90rem] mx-auto md:items-center"> <form id="main-form" class="p-2 rounded-md flex flex-col gap-4 border border-gray-300 md:w-[70%] lg:w-[50%]"> <div class="flex flex-col gap-2"> <label for="description-input" class="font-medium">Descripcion</label> <div class="relative flex items-center w-full"> <input type="text" name="description-input" id="description-input" class="w-full rounded-md p-2 text-base ring-1 ring-gray-300 focus:outline-none focus:ring-indigo-500" placeholder="Descripcion"> <span class="absolute right-2.5 hidden text-xl"></span> </div> </div> <div class="flex flex-col gap-2"> <div class="flex flex-col gap-2"> <label for="fecha-input" class="font-medium">Fecha</label> <div class="relative flex items-center w-full"> <input type="date" name="date-input" id="date-input" class="w-full rounded-md p-2 text-base ring-1 ring-gray-300 focus:outline-none focus:ring-indigo-500 cursor-pointer"> <span class="absolute right-2.5 hidden text-xl"></span> </div> </div> </div> <div class="flex flex-col gap-2"> <label for="date-input" class="font-medium">Fecha Limite</label> <div class="relative flex items-center w-full"> <input type="date" name="date-limit-input" id="date-limit-input" class="w-full rounded-md p-2 text-base ring-1 ring-gray-300 focus:outline-none focus:ring-indigo-500 cursor-pointer"> <span class="absolute right-2.5 hidden text-xl"></span> </div> </div> <div class="flex flex-col gap-2"> <label for="monto-input" class="font-medium">Monto</label> <div class="relative flex items-center w-full"> <span class="absolute left-2 text-base text-gray-500">$</span> <input type="number" step="0.01" min="0" name="monto-input" id="monto-input" class="w-full rounded-md p-2 pl-6 pr-8 text-base ring-1 ring-gray-300 focus:outline-none focus:ring-indigo-500" placeholder="Monto"> <span class="absolute right-2.5 hidden text-xl"></span> </div> </div> <button id="main-form-btn" disabled class="bg-indigo-700 py-2 px-4 text-white text-center uppercase font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed">Crear Cuota</button> </form> <script type="module" src="/_astro/CreateCuotaForm.astro_astro_type_script_index_0_lang.CSZ3zFNb.js"></script> <ul id="cuotas-list" class="m-0 p-2 list-none overflow-auto flex flex-col gap-8 rounded-md border border-gray-300 h-full md:w-[70%] lg:w-[50%]"> <template id="cuotas-item-template"> <li id="0" class="flex gap-4 justify-between items-center" data-status="inputs-deshabilitados"> <div class="flex flex-wrap md:flex-nowrap gap-2 flex-grow"> <input class="w-full bg-gray-500 rounded-md p-2 outline-none" type="text" value="mes de agosto" readonly> <input class="w-full bg-gray-500 rounded-md p-2 outline-none" type="text" value="08-07-2025" readonly> <input class="w-full bg-gray-500 rounded-md p-2 outline-none" type="text" value="08-08-2025" readonly> <input class="w-full bg-gray-500 rounded-md p-2 outline-none" type="text" readonly> </div> <div class="flex gap-2 items-center"> <button class="edit-btn w-8 h-8 flex justify-center items-center text-gray-600 hover:text-indigo-700"> <svg width="1em" height="1em" viewBox="0 0 24 24" class="w-6 h-6" data-icon="mdi:account-box-edit-outline">   <path fill="currentColor" d="m21.7 13.58l-1.28-1.28a.55.55 0 0 0-.77 0l-1 1l2.05 2.05l1-1a.55.55 0 0 0 0-.77M12 22h2.06l6.05-6.07l-2.05-2.05L12 19.94zm-2-1H5c-.53 0-1.04-.21-1.41-.59C3.21 20.04 3 19.53 3 19V5c0-.53.21-1.04.59-1.41C3.96 3.21 4.47 3 5 3h14a2 2 0 0 1 2 2v5.33a2.57 2.57 0 0 0-2 .03V5H5v14h5.11l-.11.11zm4.62-6.5L12.11 17H7.5v-.75c0-1.5 3-2.25 4.5-2.25c.7 0 1.73.16 2.62.5m-1.03-2.91c-.42.41-.99.66-1.59.66s-1.17-.25-1.59-.66A2.3 2.3 0 0 1 9.75 10c0-.6.25-1.17.66-1.59c.42-.41.99-.66 1.59-.66s1.17.25 1.59.66c.41.42.66.99.66 1.59s-.25 1.17-.66 1.59"/> </svg> <svg width="1em" height="1em" viewBox="0 0 24 24" class="w-6 h-6 hidden" data-icon="mdi:pencil">   <path fill="currentColor" d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83l3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"/> </svg> </button> <button class="delete-btn w-8 h-8 flex justify-center items-center text-gray-600 hover:text-red-600"> <svg width="1em" height="1em" viewBox="0 0 24 24" class="w-6 h-6" data-icon="mdi:alpha-x">   <path fill="currentColor" d="m9 7l2 5l-2 5h2l1-2.5l1 2.5h2l-2-5l2-5h-2l-1 2.5L11 7z"/> </svg> </button> </div> </li> </template> </ul> <script type="module" src="/_astro/CuotasList.astro_astro_type_script_index_0_lang.D_Wa9j1W.js"></script> </main> </div> </div> <script type="module" src="/_astro/AuthProtected.astro_astro_type_script_index_0_lang.Hfj5zOBN.js"></script>  </body></html>

@@ -1,0 +1,143 @@
+<form id="main-form" class="rounded-md flex flex-col p-2 gap-4 border border-gray-300 dark:border-gray-500 w-full">
+  <div class="flex flex-col gap-2">
+    <label for="description-input" class="font-medium">Descripcion</label>
+    <div class="relative flex items-center w-full">
+      <input type="text" name="description-input" id="description-input" class="w-full rounded-md p-2 text-base ring-1 ring-gray-300 focus:outline-none focus:ring-indigo-500" placeholder="Descripcion">
+      <span class="absolute right-2.5 hidden text-xl"></span>
+    </div>
+  </div>
+  <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-2">
+    <label for="fecha-input" class="font-medium">Fecha</label>
+    <div class="relative flex items-center w-full">
+      <input type="date" name="date-input" id="date-input" class="w-full rounded-md p-2 text-base ring-1 ring-gray-300 focus:outline-none focus:ring-indigo-500 cursor-pointer">
+      <span class="absolute right-2.5 hidden text-xl"></span>
+    </div>
+  </div>
+  </div>
+  <div class="flex flex-col gap-2">
+    <label for="date-input" class="font-medium">Fecha Limite</label>
+    <div class="relative flex items-center w-full">
+      <input type="date" name="date-limit-input" id="date-limit-input" class="w-full rounded-md p-2 text-base ring-1 ring-gray-300 focus:outline-none focus:ring-indigo-500 cursor-pointer">
+      <span class="absolute right-2.5 hidden text-xl"></span>
+    </div>
+  </div>
+  <div class="flex flex-col gap-2">
+    <label for="monto-input" class="font-medium">Monto</label>
+    <div class="relative flex items-center w-full">
+      <span class="absolute left-2 text-base text-gray-500">$</span>
+      <input type="number" step="0.01" min="0" name="monto-input" id="monto-input" class="w-full rounded-md p-2 pl-6 pr-8 text-base ring-1 ring-gray-300 focus:outline-none focus:ring-indigo-500" placeholder="Monto">
+      <span class="absolute right-2.5 hidden text-xl"></span>
+    </div>
+  </div>
+  <button id="main-form-btn" disabled class="w-full px-5 py-3 text-base font-medium text-center text-white bg-[#2563EB] rounded-lg hover:bg-[#4077ED]focus:ring-4 focus:ring-green-300 disabled:bg-gray-600 disabled:cursor-not-allowed dark:bg-[#2563EB] dark:hover:bg-[#4077ED] dark:focus:ring-blue-800 dark:disabled:bg-gray-600 transition-colors duration-200">Crear Cuota</button>
+</form>
+
+<script>
+// @ts-nocheck
+// Modulos
+import CuotasModule from "./cuotas.module";
+
+// Selectores
+const inputDescription = document.querySelector('#description-input');
+const inputDate = document.querySelector('#date-input');
+const inputDateLimit = document.querySelector('#date-limit-input');
+const form = document.querySelector('#main-form');
+const formBtn = document.querySelector('#main-form-btn');
+const cuotasList = document.querySelector('#cuotas-list');
+const inputMonto = document.querySelector('#monto-input');
+
+// Regex
+const DESCRIPTION_REGEX = /^(?!\s*$).+$/;
+const DATE_REGEX = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
+const DATE_LIMIT_REGEX = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
+const MONTO_REGEX = /^\d+(\.\d{1,2})?$/;
+
+let descriptionValidation = false;
+let dateValidation = false;
+let dateLimitValidation = false;
+let montoValidation = false;
+
+// Agregar event listeners para abrir el selector de fechas al hacer clic en el input
+inputDate.addEventListener('click', () => {
+    inputDate.showPicker();
+});
+
+inputDateLimit.addEventListener('click', () => {
+    inputDateLimit.showPicker();
+});
+
+// Funciones
+const renderValidation = (input, validation) => {
+  const helperText = input.parentElement.nextElementSibling;
+  const iconContainer = input.nextElementSibling;
+  
+  if (input.value === '') {
+    input.classList.remove('input-invalid', 'input-valid');
+    helperText?.classList.remove('show-helper-text');
+    iconContainer.innerHTML = '';
+    iconContainer.classList.remove('show');
+  } else if (validation) {
+    input.classList.add('input-valid');
+    input.classList.remove('input-invalid');
+    helperText?.classList.remove('show-helper-text');
+    iconContainer.innerHTML = '<span class="iconify" data-icon="mdi:check-circle" style="color: green;"></span>';
+    iconContainer.classList.add('show');
+  } else {
+    input.classList.add('input-invalid');
+    input.classList.remove('input-valid');
+    helperText?.classList.add('show-helper-text');
+    iconContainer.innerHTML = '<span class="iconify" data-icon="mdi:close-circle" style="color: red;"></span>';
+    iconContainer.classList.add('show');
+  }
+}
+
+const renderButtonState = () => {
+  if (descriptionValidation && dateValidation && dateLimitValidation && montoValidation) {
+    formBtn.disabled = false;
+  } else {
+    formBtn.disabled = true;
+  }
+}
+inputMonto.addEventListener('input', e => {
+  montoValidation = MONTO_REGEX.test(inputMonto.value) && parseFloat(inputMonto.value) > 0;
+  renderValidation(inputMonto, montoValidation);
+  renderButtonState();
+});
+
+// Eventos
+inputDescription.addEventListener('input', e => {
+  descriptionValidation = DESCRIPTION_REGEX.test(inputDescription.value);
+  renderValidation(inputDescription, descriptionValidation);
+  renderButtonState();
+});
+
+inputDate.addEventListener('input', e => {
+  dateValidation = DATE_REGEX.test(inputDate.value);
+  renderValidation(inputDate, dateValidation);
+  renderButtonState();
+});
+
+inputDateLimit.addEventListener('input', e => {
+  dateLimitValidation = DATE_LIMIT_REGEX.test(inputDateLimit.value);
+  renderValidation(inputDateLimit, dateLimitValidation);
+  renderButtonState();
+});
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  // 1. Validar
+  if (!descriptionValidation || !dateValidation || !dateLimitValidation || !montoValidation) return;
+  // 2. Agregar la cuota
+  await CuotasModule.addCuota({
+    description: inputDescription.value,
+    date: inputDate.value,
+    date_limit: inputDateLimit.value,
+    monto: inputMonto.value
+  });
+  inputMonto.value = '';
+  montoValidation = false;
+  renderValidation(inputMonto, false);
+  renderButtonState();
+});
+</script>

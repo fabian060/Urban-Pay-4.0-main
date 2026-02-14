@@ -8,8 +8,7 @@
     "client:dev": "npm run dev --workspace=client",
     "server:dev": "npm run dev --workspace=server",
     "server:prod": "npm run prod --workspace=server",
-    "build:client": "npm run build --workspace=client",
-    "build": "npm run build --workspaces"
+    "build:client": "npm run build --workspace=client"
   },
   "workspaces": [
     "apps/*"
